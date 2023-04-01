@@ -1,6 +1,10 @@
 # importing needed libraries
 import pandas as pd
+from sklearn.model_selection import KFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 # First step which is to load and dividing data to X and Y
 dfPath = r'data.csv'
@@ -24,10 +28,10 @@ y = assignmentData['Cover_Type']
 print(X.head())
 print(y.head())
 
-# Divide data into train and test set. We chose test_size = 0.3 to get a 70-30 division.
-X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3,shuffle=True)
+# Second step : Divide data into train and test set. We chose test_size = 0.3 to get a 70-30 division.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)
 
-#Second step : It's time to preproccess
+# Third step : It's time to preproccess
 # As we checked there is no missing values and no duplicate ones.
 # And all of our data is numerical, and there are no categorical columns that need to be converted to numerical values.
 # So we should just check if scaling is needed.
@@ -46,3 +50,60 @@ X_train[cols_to_scale] = Scaler.transform(X_train[cols_to_scale])
 X_test[cols_to_scale] = Scaler.transform(X_test[cols_to_scale])
 
 print(X.head())
+
+# Step 4: 5 fold validation
+five_fold = KFold(n_splits=5, shuffle=True, random_state=10)
+
+tree_parameters ={'max_depth': [1, 5, 10, 15, 20],
+                    'criterion' : ['gini', 'entropy', 'log_loss'],
+                    'min_samples_split': [5, 7, 10, 12, 15],
+                    'min_samples_leaf' : [1, 2, 5, 7, 10]}
+
+# Create a decision tree classifier model
+tree_model = DecisionTreeClassifier()
+
+# search for the best parameters
+tree_grid = GridSearchCV(tree_model, tree_parameters, cv=five_fold, error_score="raise")
+
+# Fit the GridSearchCV objects to your data
+tree_grid.fit(X_train, y_train)
+
+print("Best parameters for Decision Tree: ", tree_grid.best_params_)
+
+# Printing all othe options:
+results_df = pd.DataFrame(tree_grid.cv_results_)
+results_df = results_df[['params', 'mean_test_score', 'std_test_score']]
+results_df = results_df.sort_values(by=['mean_test_score'], ascending=False)
+with pd.option_context('display.max_rows', None,
+                       'display.max_columns', None,
+                       'display.precision', 3,
+                       'display.max_colwidth', None
+                       ):
+    print(results_df)
+
+
+# Samwthing for random forest
+forest_parameters =  {'n_estimators': [10, 20, 50, 100, 200],
+                    'max_depth': [1, 5, 10, 15, 20],
+                    'criterion' : ['gini', 'entropy', 'log_loss'],
+                    'min_samples_split': [5, 7, 10, 12, 15],
+                    'min_samples_leaf' : [1, 2, 5, 7, 10]}
+
+# Create a random forest classifier model
+forest_model = RandomForestClassifier()
+forest_grid = GridSearchCV(forest_model, forest_parameters, cv=five_fold)
+forest_grid.fit(X_train, y_train)
+print("done")
+# Print the best parameters for each model
+
+print("Best parameters for Random Forest: ", forest_grid.best_params_)
+
+results_df = pd.DataFrame(forest_grid.cv_results_)
+results_df = results_df[['params', 'mean_test_score']]
+results_df = results_df.sort_values(by=['mean_test_score'], ascending=False)
+with pd.option_context('display.max_rows', None,
+                       'display.max_columns', None,
+                       'display.precision', 3,
+                       'display.max_colwidth', None
+                       ):
+    print(results_df)
