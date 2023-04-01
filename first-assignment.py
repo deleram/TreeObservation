@@ -41,7 +41,8 @@ cols_to_scale = ['Elevation', 'Aspect', 'Slope','Horizontal_Distance_To_Hydrolog
 #define our scaler
 Scaler = StandardScaler()
 # scale our columns
-Scaler.fit(X[cols_to_scale])
-X[cols_to_scale] = Scaler.transform(X[cols_to_scale])
+Scaler.fit(X_train[cols_to_scale])
+X_train[cols_to_scale] = Scaler.transform(X_train[cols_to_scale])
+X_test[cols_to_scale] = Scaler.transform(X_test[cols_to_scale])
 
 print(X.head())
