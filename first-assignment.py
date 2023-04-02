@@ -54,56 +54,65 @@ print(X.head())
 # Step 4: 5 fold validation
 five_fold = KFold(n_splits=5, shuffle=True, random_state=10)
 
-tree_parameters ={'max_depth': [1, 5, 10, 15, 20],
-                    'criterion' : ['gini', 'entropy', 'log_loss'],
-                    'min_samples_split': [5, 7, 10, 12, 15],
-                    'min_samples_leaf' : [1, 2, 5, 7, 10]}
+tree_parameters ={'max_depth': [20, 25],
+                    'criterion' : ['entropy', 'log_loss'],
+                    'min_samples_split': [5, 7],
+                    'min_samples_leaf' : [1, 2]}
 
 # Create a decision tree classifier model
-tree_model = DecisionTreeClassifier()
+# tree_model = DecisionTreeClassifier()
 
-# search for the best parameters
-tree_grid = GridSearchCV(tree_model, tree_parameters, cv=five_fold, error_score="raise")
+# # search for the best parameters
+# tree_grid = GridSearchCV(tree_model, tree_parameters, cv=five_fold, error_score="raise")
 
-# Fit the GridSearchCV objects to your data
-tree_grid.fit(X_train, y_train)
+# # Fit the GridSearchCV objects to your data
+# tree_grid.fit(X_train, y_train)
 
-print("Best parameters for Decision Tree: ", tree_grid.best_params_)
+# print("Best parameters for Decision Tree: ", tree_grid.best_params_)
 
-# Printing all othe options:
-results_df = pd.DataFrame(tree_grid.cv_results_)
-results_df = results_df[['params', 'mean_test_score', 'std_test_score']]
-results_df = results_df.sort_values(by=['mean_test_score'], ascending=False)
-with pd.option_context('display.max_rows', None,
-                       'display.max_columns', None,
-                       'display.precision', 3,
-                       'display.max_colwidth', None
-                       ):
-    print(results_df)
+# # Printing all othe options:
+# results_df = pd.DataFrame(tree_grid.cv_results_)
+# results_df = results_df[['params', 'mean_test_score', 'std_test_score']]
+# results_df = results_df.sort_values(by=['mean_test_score'], ascending=False)
+# with pd.option_context('display.max_rows', None,
+#                        'display.max_columns', None,
+#                        'display.precision', 3,
+#                        'display.max_colwidth', None
+#                        ):
+#     print(results_df)
+
+Best_tree = {'criterion': 'log_loss', 'min_samples_leaf': 1, 'min_samples_split': 5}
 
 
-# Samwthing for random forest
-forest_parameters =  {'n_estimators': [10, 20, 50, 100, 200],
-                    'max_depth': [1, 5, 10, 15, 20],
-                    'criterion' : ['gini', 'entropy', 'log_loss'],
-                    'min_samples_split': [5, 7, 10, 12, 15],
-                    'min_samples_leaf' : [1, 2, 5, 7, 10]}
+# Same thing for random forest
+forest_parameters =  {'n_estimators': [100, 150],
+                    'criterion' : ['entropy'],
+                    'min_samples_split': [5, 7],
+                    'min_samples_leaf' : [1, 2],
+                    }
 
-# Create a random forest classifier model
-forest_model = RandomForestClassifier()
-forest_grid = GridSearchCV(forest_model, forest_parameters, cv=five_fold)
-forest_grid.fit(X_train, y_train)
-print("done")
-# Print the best parameters for each model
+# # Create a random forest classifier model
+# forest_model = RandomForestClassifier()
+# forest_grid = GridSearchCV(forest_model, forest_parameters, cv=five_fold)
+# forest_grid.fit(X_train, y_train)
 
-print("Best parameters for Random Forest: ", forest_grid.best_params_)
+# # Print the best parameters for each model
 
-results_df = pd.DataFrame(forest_grid.cv_results_)
-results_df = results_df[['params', 'mean_test_score']]
-results_df = results_df.sort_values(by=['mean_test_score'], ascending=False)
-with pd.option_context('display.max_rows', None,
-                       'display.max_columns', None,
-                       'display.precision', 3,
-                       'display.max_colwidth', None
-                       ):
-    print(results_df)
+# print("Best parameters for Random Forest: ", forest_grid.best_params_)
+
+# results_df = pd.DataFrame(forest_grid.cv_results_)
+# results_df = results_df[['params', 'mean_test_score', 'std_test_score']]
+# results_df = results_df.sort_values(by=['mean_test_score'], ascending=False)
+# with pd.option_context('display.max_rows', None,
+#                        'display.max_columns', None,
+#                        'display.precision', 3,
+#                        'display.max_colwidth', None
+#                        ):
+#     print(results_df)
+
+Best_forest = {'criterion': 'entropy', 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 150}
+# fit the model to our test data to see the results
+
+tree_model = DecisionTreeClassifier(criterion = "log_loss" , min_samples_leaf = 1, min_samples_split = 5)
+tree_model.fit(X_train,y_train)
+y_pred = tree_model.predict(X_test)
