@@ -6,6 +6,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 # First step which is to load and dividing data to X and Y
 dfPath = r'data.csv'
 assignmentData = pd.read_csv(dfPath)
@@ -18,7 +19,6 @@ print('Number of rows with null values:', sum(null_rows))
 
 # Check if there is any duplicate rows
 duplicate_rows = assignmentData[assignmentData.duplicated()]
-# Print the number of duplicate rows
 print("Number of duplicate rows: ", len(duplicate_rows))
 # none where found
 
@@ -40,8 +40,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 # choose desired columns
 cols_to_scale = ['Elevation', 'Aspect', 'Slope','Horizontal_Distance_To_Hydrology',
                  'Vertical_Distance_To_Hydrology','Horizontal_Distance_To_Roadways',
-                 'Hillshade_9am','Hillshade_Noon','Hillshade_3pm','Horizontal_Distance_To_Fire_Points'
-]
+                 'Hillshade_9am','Hillshade_Noon','Hillshade_3pm','Horizontal_Distance_To_Fire_Points']
 #define our scaler
 Scaler = StandardScaler()
 # scale our columns
@@ -49,7 +48,7 @@ Scaler.fit(X_train[cols_to_scale])
 X_train[cols_to_scale] = Scaler.transform(X_train[cols_to_scale])
 X_test[cols_to_scale] = Scaler.transform(X_test[cols_to_scale])
 
-print(X.head())
+print(X_train.head())
 
 # Step 4: 5 fold validation
 five_fold = KFold(n_splits=5, shuffle=True, random_state=10)
@@ -113,6 +112,21 @@ forest_parameters =  {'n_estimators': [100, 150],
 Best_forest = {'criterion': 'entropy', 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 150}
 # fit the model to our test data to see the results
 
+#  Step 5 & Documentation : prediction
+
 tree_model = DecisionTreeClassifier(criterion = "log_loss" , min_samples_leaf = 1, min_samples_split = 5)
 tree_model.fit(X_train,y_train)
 y_pred = tree_model.predict(X_test)
+print(accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+
+print("------------------------------------")
+
+forest_model = RandomForestClassifier(criterion = "entropy" , min_samples_leaf = 1, min_samples_split = 5, n_estimators= 150 )
+forest_model.fit(X_train,y_train)
+y_pred = forest_model.predict(X_test)
+print(accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+
